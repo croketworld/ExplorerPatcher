@@ -4,6 +4,7 @@
 #include <commctrl.h>
 #pragma comment(lib, "Comctl32.lib")
 #include "osutility.h"
+#include "MagicExplorerButton/MagicExplorerButton.h"
 
 // https://stackoverflow.com/questions/30141592/how-do-i-find-a-handle-inside-a-control
 HWND FindChildWindow(
