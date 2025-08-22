@@ -1,4 +1,4 @@
-#include "MagicExplorerButton.h"
+﻿#include "MagicExplorerButton.h"
 #include <shlobj.h>
 #include <shobjidl.h>
 #include <commctrl.h>
@@ -195,7 +195,8 @@ static BOOL MEB_GetActiveFolderPath(HWND hwndExplorer, wchar_t* out, size_t cchO
                                     IShellView* view = NULL;
                                     if (SUCCEEDED(browser->lpVtbl->QueryActiveShellView(browser, &view)) && view) {
                                         IPersistFolder2* pf2 = NULL;
-                                        if (SUCCEEDED(view->lpVtbl->GetFolder(view, &IID_IPersistFolder2, (void**)&pf2)) && pf2) {
+                                        IShellView* psv = view;
+                                        if (SUCCEEDED(psv->lpVtbl->GetItemObject(psv, SVGIO_BACKGROUND, &IID_IPersistFolder2, (void**)&pf2)) && pf2) {
                                             PIDLIST_ABSOLUTE pidl = NULL;
                                             if (SUCCEEDED(pf2->lpVtbl->GetCurFolder(pf2, &pidl)) && pidl) {
                                                 PWSTR pszPath = NULL;
@@ -204,10 +205,16 @@ static BOOL MEB_GetActiveFolderPath(HWND hwndExplorer, wchar_t* out, size_t cchO
                                                     CoTaskMemFree(pszPath);
                                                     ok = TRUE;
                                                 }
+                                                else {
+                                                    // Fallback (por si SHGetNameFromIDList no da ruta del sistema)
+                                                    wchar_t tmp[MAX_PATH];
+                                                    if (SHGetPathFromIDListW(pidl, tmp)) {
+                                                        StringCchCopyW(out, cchOut, tmp);
+                                                        ok = TRUE;
+                                                    }
+                                                }
                                                 CoTaskMemFree(pidl);
                                             }
-                                            pf2->lpVtbl->Release(pf2);
-                                        }
                                         view->lpVtbl->Release(view);
                                     }
                                     browser->lpVtbl->Release(browser);
