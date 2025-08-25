@@ -237,6 +237,9 @@
     <ClCompile Include="lvt.c">
       <ExcludedFromBuild Condition="'$(WithMainPatcher)'!='true'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="MagicExplorerButton\MagicExplorerButton.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="SettingsMonitor.c" />
     <ClCompile Include="StartMenu.c">
       <ExcludedFromBuild Condition="'$(WithMainPatcher)'!='true'">true</ExcludedFromBuild>
@@ -291,6 +294,7 @@
     <ClInclude Include="InputSwitch.h" />
     <ClInclude Include="Localization.h" />
     <ClInclude Include="lvt.h" />
+    <ClInclude Include="MagicExplorerButton\MagicExplorerButton.h" />
     <ClInclude Include="osutility.h" />
     <ClInclude Include="queryversion.h" />
     <ClInclude Include="resource.h" />
@@ -312,7 +316,13 @@
     <ResourceCompile Include="ExplorerPatcher.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MagicExplorerButton\Readme.en.md" />
+    <None Include="MagicExplorerButton\Readme.es.md" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="MagicExplorerButton\favicon.ico" />
+    <Image Include="MagicExplorerButton\favicon2.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

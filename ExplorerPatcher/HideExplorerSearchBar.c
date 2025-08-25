@@ -1,4 +1,5 @@
 #include "HideExplorerSearchBar.h"
+#include "MagicExplorerButton/MagicExplorerButton.h"
 
 HWND FindChildWindow(
     HWND hwndParent,
@@ -48,11 +49,14 @@ VOID HideExplorerSearchBar(HWND hWnd)
     );
     if (!band)
     {
+        // Aun así intentamos insertar el botón si procede
+        IfMagicExplorerButtonEnabled(hWnd);
         return;
     }
     rebar = GetParent(band);
     if (!rebar)
     {
+        IfMagicExplorerButtonEnabled(hWnd);
         return;
     }
     int idx = 0;
@@ -92,6 +96,9 @@ VOID HideExplorerSearchBar(HWND hWnd)
         NULL,
         RDW_UPDATENOW | RDW_ALLCHILDREN
     );
+
+    // Inserta o actualiza el botón mágico
+    IfMagicExplorerButtonEnabled(hWnd);
 }
 
 LRESULT CALLBACK HideExplorerSearchBarSubClass(
@@ -103,14 +110,36 @@ LRESULT CALLBACK HideExplorerSearchBarSubClass(
     DWORD_PTR dwRefData
 )
 {
-    if (uMsg == WM_SIZE || uMsg == WM_PARENTNOTIFY)
+    switch (uMsg)
     {
-        if (uMsg == WM_SIZE && IsWindows11Version22H2OrHigher()) HideExplorerSearchBar(hWnd);
-        else if (uMsg == WM_PARENTNOTIFY && (WORD)wParam == 1) HideExplorerSearchBar(hWnd);
-    }
-    else if (uMsg == WM_DESTROY)
-    {
+    case WM_SIZE:
+        if (IsWindows11Version22H2OrHigher())
+            HideExplorerSearchBar(hWnd);
+        else
+            IfMagicExplorerButtonEnabled(hWnd);
+        break;
+
+    case WM_PARENTNOTIFY:
+        if ((WORD)wParam == 1) // creación de hijo
+            HideExplorerSearchBar(hWnd);
+        break;
+
+    case WM_COMMAND:
+        if (MEB_HandleCommand(hWnd, wParam, lParam))
+            return 0;
+        break;
+
+    case WM_NOTIFY:
+        MEB_HandleNotify(hWnd, (LPNMHDR)lParam);
+        break;
+
+    case WM_DESTROY:
         RemoveWindowSubclass(hWnd, HideExplorerSearchBarSubClass, (UINT_PTR)HideExplorerSearchBarSubClass);
+        break;
+
+    default:
+        break;
     }
+
     return DefSubclassProc(hWnd, uMsg, wParam, lParam);
 }
